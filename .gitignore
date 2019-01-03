@@ -2,3 +2,4 @@
 .vscode
 songs/*
 !songs/readme
+.DS_Store
