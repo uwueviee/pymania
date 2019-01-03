@@ -3,6 +3,19 @@ from pygame.locals import *
 import random
 from discoIPC import ipc
 import time
+import math
+from itertools import cycle
+
+def magnitude(v):
+    return math.sqrt(sum(v[i]*v[i] for i in range(len(v))))
+
+def sub(u, v):
+    return [ u[i]-v[i] for i in range(len(u)) ]
+
+def normalize(v):
+    vmag = magnitude(v)
+    return [ v[i]/vmag  for i in range(len(v)) ]
+
 
 client_id = "530330721911439381"
 client = ipc.DiscordIPC(client_id)
@@ -27,6 +40,7 @@ menuActivity = {
 }
 
 pygame.init()
+clock = pygame.time.Clock()
 windowIcon = pygame.image.load("assets/PyManiaLogo.png")
 gameTitle = pygame.image.load("assets/PyManiaLogoText.png")
 pygame.display.set_icon(windowIcon)
@@ -99,6 +113,7 @@ def mainMenu():
             if click[0] == 1:
                 clickSound.set_volume(0.6)
                 clickSound.play()
+                testLoop()
 
         if quitRect.x+quit.get_width() > mouse[0] > quitRect.x and quitRect.y+quit.get_height() > mouse[1] > quitRect.y:
             if click[0] == 1:
@@ -107,12 +122,101 @@ def mainMenu():
                 pygame.quit()
                 sys.exit()
 
-def testLoop():
+def pickSong():
+    # Define main menu only colors
+    menuBackgroundColor = (52, 52, 52)
+    menuTextColor = (240, 240, 240)
+
+    # Draw everything to window
+    windowSurface.fill(menuBackgroundColor)
+
     while True:
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
+
+        mouse = pygame.mouse.get_pos()
+        click = pygame.mouse.get_pressed()
+        print(mouse)
+        print(click)
+        pygame.display.update()
+
+def testLoop():
+    # Define meme
+    rect1_x = random.randint(1, 1159)
+    rect1_y = random.randint(1, 589)
+    rect2_x = random.randint(1, 1159)
+    rect2_y = random.randint(1, 589)
+    rect3_x = random.randint(1, 1159)
+    rect3_y = random.randint(1, 589)
+    rect1xSpeed = random.randint(3, 6)
+    rect1ySpeed = random.randint(3, 6)
+    rect2xSpeed = random.randint(7, 9)
+    rect2ySpeed = random.randint(7, 9)
+    rect3xSpeed = random.randint(10, 12)
+    rect3ySpeed = random.randint(10, 12)
+    gameLogoMeme = pygame.transform.smoothscale(windowIcon, (128, 128))
+
+    # Define main menu only colors
+    menuBackgroundColor = (52, 52, 52)
+    menuTextColor = (240, 240, 240)
+
+    # Draw everything to window
+    windowSurface.fill(menuBackgroundColor)
+    lolTextShow = 1
+    while True:
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+
+        mouse = pygame.mouse.get_pos()
+        click = pygame.mouse.get_pressed()
+        print(mouse)
+        print(click)
+        string1 = str(rect1_x)
+        string12 = str(rect1_y)
+        string2 = str(rect2_x)
+        string22 = str(rect2_y)
+        string3 = str(rect3_x)
+        string32 = str(rect3_y)
+        print "[" + string1 + "]" + "[" + string12 + "]"
+        print "[" + string2 + "]" + "[" + string22 + "]"
+        print "[" + string3+ "]" + "[" + string32 + "]"
+        rect1_x += rect1xSpeed
+        rect1_y += rect1ySpeed
+        if rect1_y > 590 or rect1_y < 0:
+            rect1ySpeed = rect1ySpeed * - 1
+        if rect1_x > 1160 or rect1_x < 0:
+            rect1xSpeed = rect1xSpeed * - 1
+        rect2_x += rect2xSpeed
+        rect2_y += rect2ySpeed
+        if rect2_y > 590 or rect2_y < 0:
+            rect2ySpeed = rect2ySpeed * - 1
+        if rect2_x > 1160 or rect2_x < 0:
+            rect2xSpeed = rect2xSpeed * - 1
+        rect3_x += rect3xSpeed
+        rect3_y += rect3ySpeed
+        if rect3_y > 590 or rect3_y < 0:
+            rect3ySpeed = rect3ySpeed * - 1
+        if rect3_x > 1160 or rect3_x < 0:
+            rect3xSpeed = rect3xSpeed * - 1
+        windowSurface.fill(menuBackgroundColor)
+        windowSurface.blit(gameLogoMeme, [rect1_x, rect1_y, 50, 50])
+        windowSurface.blit(gameLogoMeme, [rect2_x, rect2_y, 50, 50])
+        windowSurface.blit(gameLogoMeme, [rect3_x, rect3_y, 50, 50])
+        buttonFont = pygame.font.Font('assets/mainMenu.ttf', 45)
+        if lolTextShow == 1:
+            lol = buttonFont.render("IT DOESN'T EXIST", True, menuTextColor)
+            lolRect = lol.get_rect()
+            lolRect.centerx = windowSurface.get_rect().centerx
+            lolRect.centery = windowSurface.get_rect().centery
+            windowSurface.blit(lol, lolRect)
+            lolTextShow = 0
+        else:
+            lolTextShow = 1
+        pygame.display.update()
 
 mainMenu()
 testLoop()
