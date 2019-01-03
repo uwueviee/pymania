@@ -113,7 +113,7 @@ def mainMenu():
             if click[0] == 1:
                 clickSound.set_volume(0.6)
                 clickSound.play()
-                testLoop()
+                selectMode()
 
         if quitRect.x+quit.get_width() > mouse[0] > quitRect.x and quitRect.y+quit.get_height() > mouse[1] > quitRect.y:
             if click[0] == 1:
@@ -121,6 +121,61 @@ def mainMenu():
                 clickSound.play()
                 pygame.quit()
                 sys.exit()
+
+def selectMode():
+    clickSound = pygame.mixer.Sound("assets/click.ogg")
+
+    # Define main menu only colors
+    menuBackgroundColor = (52, 52, 52)
+    menuTextColor = (240, 240, 240)
+
+    # Buttons
+    buttonFont = pygame.font.Font('assets/mainMenu.ttf', 45)
+
+    gameTitleMenu = buttonFont.render('SELECT A MODE', True, menuTextColor)
+    titleRect = gameTitleMenu.get_rect()
+    titleRect.centerx = windowSurface.get_rect().centerx
+    titleRect.centery = windowSurface.get_rect().centery - 150
+
+    start = buttonFont.render('SOLO', True, menuTextColor)
+    startRect = start.get_rect()
+    startRect.centerx = windowSurface.get_rect().centerx - 130
+    startRect.centery = windowSurface.get_rect().centery + 50
+
+    quit = buttonFont.render('VERSUS', True, menuTextColor)
+    quitRect = quit.get_rect()
+    quitRect.centerx = windowSurface.get_rect().centerx + 90
+    quitRect.centery = windowSurface.get_rect().centery + 50
+
+    # Draw everything to window
+    windowSurface.fill(menuBackgroundColor)
+    windowSurface.blit(gameTitleMenu, titleRect)
+    windowSurface.blit(start, startRect)
+    windowSurface.blit(quit, quitRect)
+
+    # Make the menu I N T E R A C T I V E
+    while True:
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+
+        mouse = pygame.mouse.get_pos()
+        click = pygame.mouse.get_pressed()
+        print(mouse)
+        print(click)
+        pygame.display.update()
+        if startRect.x+start.get_width() > mouse[0] > startRect.x and startRect.y+start.get_height() > mouse[1] > startRect.y:
+            if click[0] == 1:
+                clickSound.set_volume(0.6)
+                clickSound.play()
+                pickSong()
+
+        if quitRect.x+quit.get_width() > mouse[0] > quitRect.x and quitRect.y+quit.get_height() > mouse[1] > quitRect.y:
+            if click[0] == 1:
+                clickSound.set_volume(0.6)
+                clickSound.play()
+                testLoop()
 
 def pickSong():
     # Define main menu only colors
