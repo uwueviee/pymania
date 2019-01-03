@@ -12,8 +12,8 @@ baseActivity = {
     'details': 'In the main menu',
     'timestamps': {},
     'assets': {
-        'small_image': 'PyManiaLogo',
-        'small_text': 'PyMania',
+        'large_image': 'pymanialogo',
+        'large_text': 'PyMania',
     }
 }
 
@@ -21,13 +21,14 @@ menuActivity = {
     'details': 'In the main menu',
     'timestamps': {},
     'assets': {
-        'small_image': 'PyManiaLogo',
-        'small_text': 'PyMania',
+        'large_image': 'pymanialogo',
+        'large_text': 'PyMania',
     }
 }
 
 pygame.init()
 windowIcon = pygame.image.load("assets/PyManiaLogo.png")
+gameTitle = pygame.image.load("assets/PyManiaLogoText.png")
 pygame.display.set_icon(windowIcon)
 windowSurface = pygame.display.set_mode((1280, 720), 0, 32)
 windowTagLines = ["StepMania, but in python", "SnakeMania", "My keyboard broke",
@@ -48,18 +49,13 @@ def mainMenu():
     client.update_activity(menuActivity)
     pygame.mixer.music.load("assets/menu.ogg")
     pygame.mixer.music.play(-1)
-    menuTextColor = (0, 0, 0)
-    menuBackgroundColor = (255, 255, 255)
-    menuFont = pygame.font.Font("assets/mainMenu.ttf", 92)
-    gameTitleText = menuFont.render('PyMania', True, menuTextColor)
-    textRect = gameTitleText.get_rect()
-    textRect.centerx = windowSurface.get_rect().centerx
-    textRect.centery = windowSurface.get_rect().centery - 280
+    menuBackgroundColor = (107, 107, 107)
+    gameTitleMenu = pygame.transform.smoothscale(gameTitle, (552, 276))
+    titleRect = gameTitleMenu.get_rect()
+    titleRect.centerx = windowSurface.get_rect().centerx
+    titleRect.centery = windowSurface.get_rect().centery - 260
     windowSurface.fill(menuBackgroundColor)
-    pixArray = pygame.PixelArray(windowSurface)
-    pixArray[480][380] = menuTextColor
-    del pixArray
-    windowSurface.blit(gameTitleText, textRect)
+    windowSurface.blit(gameTitleMenu, titleRect)
     pygame.display.update()
 
 
