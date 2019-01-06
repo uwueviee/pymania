@@ -3,19 +3,6 @@ from pygame.locals import *
 import random
 from discoIPC import ipc
 import time
-import math
-from itertools import cycle
-
-def magnitude(v):
-    return math.sqrt(sum(v[i]*v[i] for i in range(len(v))))
-
-def sub(u, v):
-    return [ u[i]-v[i] for i in range(len(u)) ]
-
-def normalize(v):
-    vmag = magnitude(v)
-    return [ v[i]/vmag  for i in range(len(v)) ]
-
 
 client_id = "530330721911439381"
 client = ipc.DiscordIPC(client_id)
@@ -41,6 +28,7 @@ menuActivity = {
 
 pygame.init()
 clock = pygame.time.Clock()
+clock.tick(60)
 windowIcon = pygame.image.load("assets/PyManiaLogo.png")
 gameTitle = pygame.image.load("assets/PyManiaLogoText.png")
 pygame.display.set_icon(windowIcon)
@@ -51,6 +39,9 @@ pygame.display.set_caption('PyMania: ' + windowTagLines[random.randint(0, 4)])
 
 fallbackFont = pygame.font.SysFont(None, 48)
 
+mainMenuMusic = 0
+
+
 def set_activity(songName):
     activity = baseActivity
     activity['state'] = 'Playing Level {0}'.format(songName)
@@ -59,14 +50,17 @@ def set_activity(songName):
     activity['assets']['large_text'] = 'Level {0}'.format(songName)
     return activity
 
+
 def mainMenu():
+    global mainMenuMusic
     # Discord RPC
     client.update_activity(menuActivity)
-
     # Load sound files and play menu music
-    pygame.mixer.music.load("assets/menu.ogg")
+    if mainMenuMusic == 0:
+        pygame.mixer.music.load("assets/menu.ogg")
+        pygame.mixer.music.play(-1)
+        mainMenuMusic = 1
     clickSound = pygame.mixer.Sound("assets/click.ogg")
-    pygame.mixer.music.play(-1)
 
     # Define main menu only colors
     menuBackgroundColor = (52, 52, 52)
@@ -122,6 +116,7 @@ def mainMenu():
                 pygame.quit()
                 sys.exit()
 
+
 def selectMode():
     clickSound = pygame.mixer.Sound("assets/click.ogg")
 
@@ -131,27 +126,40 @@ def selectMode():
 
     # Buttons
     buttonFont = pygame.font.Font('assets/mainMenu.ttf', 45)
+    modeTitleFont = pygame.font.Font('assets/mainMenu.ttf', 100)
 
-    gameTitleMenu = buttonFont.render('SELECT A MODE', True, menuTextColor)
+    gameTitleMenu = modeTitleFont.render('SELECT A MODE', True, menuTextColor)
     titleRect = gameTitleMenu.get_rect()
     titleRect.centerx = windowSurface.get_rect().centerx
     titleRect.centery = windowSurface.get_rect().centery - 150
 
     start = buttonFont.render('SOLO', True, menuTextColor)
     startRect = start.get_rect()
-    startRect.centerx = windowSurface.get_rect().centerx - 130
+    startRect.centerx = windowSurface.get_rect().centerx - 120
     startRect.centery = windowSurface.get_rect().centery + 50
 
     quit = buttonFont.render('VERSUS', True, menuTextColor)
     quitRect = quit.get_rect()
-    quitRect.centerx = windowSurface.get_rect().centerx + 90
+    quitRect.centerx = windowSurface.get_rect().centerx + 120
     quitRect.centery = windowSurface.get_rect().centery + 50
+
+    nonstop = buttonFont.render('NONSTOP', True, menuTextColor)
+    nonstopRect = nonstop.get_rect()
+    nonstopRect.centerx = windowSurface.get_rect().centerx
+    nonstopRect.centery = windowSurface.get_rect().centery + 150
+
+    back = buttonFont.render('BACK', True, menuTextColor)
+    backRect = back.get_rect()
+    backRect.centerx = windowSurface.get_rect().centerx - 550
+    backRect.centery = windowSurface.get_rect().centery + 330
 
     # Draw everything to window
     windowSurface.fill(menuBackgroundColor)
     windowSurface.blit(gameTitleMenu, titleRect)
     windowSurface.blit(start, startRect)
     windowSurface.blit(quit, quitRect)
+    windowSurface.blit(nonstop, nonstopRect)
+    windowSurface.blit(back, backRect)
 
     # Make the menu I N T E R A C T I V E
     while True:
@@ -177,13 +185,36 @@ def selectMode():
                 clickSound.play()
                 testLoop()
 
+        if nonstopRect.x+nonstop.get_width() > mouse[0] > nonstopRect.x and nonstopRect.y+nonstop.get_height() > mouse[1] > nonstopRect.y:
+            if click[0] == 1:
+                clickSound.set_volume(0.6)
+                clickSound.play()
+                testLoop()
+
+        if backRect.x+back.get_width() > mouse[0] > backRect.x and backRect.y+back.get_height() > mouse[1] > backRect.y:
+            if click[0] == 1:
+                clickSound.set_volume(0.6)
+                clickSound.play()
+                mainMenu()
+
+
 def pickSong():
+    clickSound = pygame.mixer.Sound("assets/click.ogg")
     # Define main menu only colors
     menuBackgroundColor = (52, 52, 52)
     menuTextColor = (240, 240, 240)
 
     # Draw everything to window
     windowSurface.fill(menuBackgroundColor)
+
+    buttonFont = pygame.font.Font('assets/mainMenu.ttf', 45)
+
+    back = buttonFont.render('BACK', True, menuTextColor)
+    backRect = back.get_rect()
+    backRect.centerx = windowSurface.get_rect().centerx - 550
+    backRect.centery = windowSurface.get_rect().centery + 330
+
+    windowSurface.blit(back, backRect)
 
     while True:
         for event in pygame.event.get():
@@ -196,8 +227,15 @@ def pickSong():
         print(mouse)
         print(click)
         pygame.display.update()
+        if backRect.x+back.get_width() > mouse[0] > backRect.x and backRect.y+back.get_height() > mouse[1] > backRect.y:
+            if click[0] == 1:
+                clickSound.set_volume(0.6)
+                clickSound.play()
+                selectMode()
+
 
 def testLoop():
+    clickSound = pygame.mixer.Sound("assets/click.ogg")
     # Define meme
     rect1_x = random.randint(1, 1159)
     rect1_y = random.randint(1, 589)
@@ -262,6 +300,11 @@ def testLoop():
         windowSurface.blit(gameLogoMeme, [rect2_x, rect2_y, 50, 50])
         windowSurface.blit(gameLogoMeme, [rect3_x, rect3_y, 50, 50])
         buttonFont = pygame.font.Font('assets/mainMenu.ttf', 45)
+        back = buttonFont.render('MENU', True, menuTextColor)
+        backRect = back.get_rect()
+        backRect.centerx = windowSurface.get_rect().centerx - 550
+        backRect.centery = windowSurface.get_rect().centery + 330
+        windowSurface.blit(back, backRect)
         if lolTextShow == 1:
             lol = buttonFont.render("IT DOESN'T EXIST", True, menuTextColor)
             lolRect = lol.get_rect()
@@ -272,6 +315,12 @@ def testLoop():
         else:
             lolTextShow = 1
         pygame.display.update()
+        if backRect.x+back.get_width() > mouse[0] > backRect.x and backRect.y+back.get_height() > mouse[1] > backRect.y:
+            if click[0] == 1:
+                clickSound.set_volume(0.6)
+                clickSound.play()
+                mainMenu()
+
 
 mainMenu()
 testLoop()
