@@ -4,24 +4,24 @@ from pygame.locals import *
 import random
 from discoIPC import ipc
 import time
-import ChromaPython
+#import ChromaPython
 
-Info = ChromaPython.ChromaAppInfo()
-Info.DeveloperName = 'Skye Viau'
-Info.DeveloperContact = 'skye.viau@gmail.com'
-Info.Category = 'application'
-Info.SupportedDevices = ['keyboard', 'mouse', 'mousepad']
-Info.Description = 'Step Mania clone made in Python and Pygame'
-Info.Title = 'PyMania'
+#Info = ChromaPython.ChromaAppInfo()
+#Info.DeveloperName = 'Skye Viau'
+#Info.DeveloperContact = 'skye.viau@gmail.com'
+#Info.Category = 'application'
+#Info.SupportedDevices = ['keyboard', 'mouse', 'mousepad']
+#Info.Description = 'Step Mania clone made in Python and Pygame'
+#Info.Title = 'PyMania'
 
-App = ChromaPython.ChromaApp(Info)
-KeyboardGrid = ChromaPython.ChromaGrid('Keyboard')
-MouseGrid = ChromaPython.ChromaGrid('Mouse')
-MousepadGrid = ChromaPython.ChromaGrid('Mousepad')
+#App = ChromaPython.ChromaApp(Info)
+#KeyboardGrid = ChromaPython.ChromaGrid('Keyboard')
+#MouseGrid = ChromaPython.ChromaGrid('Mouse')
+#MousepadGrid = ChromaPython.ChromaGrid('Mousepad')
 
-KeyboardGrid.set(hexcolor="#FF0000")
-MousepadGrid.set(red=255, blue=0, green=0)
-MouseGrid.set(hexcolor="0xFF0000")
+#KeyboardGrid.set(hexcolor="#FF0000")
+#MousepadGrid.set(red=255, blue=0, green=0)
+#MouseGrid.set(hexcolor="0xFF0000")
 
 client_id = "530330721911439381"
 client = ipc.DiscordIPC(client_id)
