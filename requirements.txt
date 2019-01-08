@@ -1,2 +1,3 @@
 discoipc
 pygame
+requests

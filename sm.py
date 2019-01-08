@@ -23,9 +23,11 @@ import time
 #MousepadGrid.set(red=255, blue=0, green=0)
 #MouseGrid.set(hexcolor="0xFF0000")
 
+
+# discoIPC doesn't work on Windows and all other solutions need python 3, so disable it for now until something is found
 client_id = "530330721911439381"
 client = ipc.DiscordIPC(client_id)
-# client.connect()
+#client.connect()
 
 baseActivity = {
     'details': 'In the main menu',
@@ -37,6 +39,7 @@ baseActivity = {
 }
 
 menuActivity = {
+    'state': 'testing',
     'details': 'In the main menu',
     'timestamps': {},
     'assets': {
@@ -53,7 +56,8 @@ gameTitle = pygame.image.load("assets/PyManiaLogoText.png")
 pygame.display.set_icon(windowIcon)
 windowSurface = pygame.display.set_mode((1280, 720), 0, 32)
 windowTagLines = ["StepMania, but in python", "SnakeMania", "My keyboard broke",
-                  "This probably won't work", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"]
+                  "This probably won't work", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+                  "Blame windows for Discord RPC not working"]
 pygame.display.set_caption('PyMania: ' + windowTagLines[random.randint(0, 4)])
 
 fallbackFont = pygame.font.SysFont(None, 48)
@@ -73,7 +77,7 @@ def set_activity(songName):
 def mainMenu():
     global mainMenuMusic
     # Discord RPC
-    # client.update_activity(menuActivity)
+    #client.update_activity(menuActivity)
     # Load sound files and play menu music
     if mainMenuMusic == 0:
         pygame.mixer.music.load("assets/menu.ogg")
@@ -181,6 +185,7 @@ def selectMode():
     windowSurface.blit(back, backRect)
 
     # Make the menu I N T E R A C T I V E
+    time.sleep(0.1)
     while True:
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -227,6 +232,12 @@ def pickSong():
     windowSurface.fill(menuBackgroundColor)
 
     buttonFont = pygame.font.Font('assets/mainMenu.ttf', 45)
+    modeTitleFont = pygame.font.Font('assets/mainMenu.ttf', 55)
+
+    gameTitleMenu = modeTitleFont.render('SELECT A SONG', True, menuTextColor)
+    titleRect = gameTitleMenu.get_rect()
+    titleRect.centerx = windowSurface.get_rect().centerx - 390
+    titleRect.centery = windowSurface.get_rect().centery - 310
 
     back = buttonFont.render('BACK', True, menuTextColor)
     backRect = back.get_rect()
@@ -234,6 +245,7 @@ def pickSong():
     backRect.centery = windowSurface.get_rect().centery + 330
 
     windowSurface.blit(back, backRect)
+    windowSurface.blit(gameTitleMenu, titleRect)
 
     while True:
         for event in pygame.event.get():
