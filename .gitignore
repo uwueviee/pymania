@@ -3,3 +3,4 @@
 songs/*
 !songs/readme
 .DS_Store
+.idea/workspace.xml
