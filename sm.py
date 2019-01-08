@@ -24,7 +24,7 @@ import time
 #MouseGrid.set(hexcolor="0xFF0000")
 
 
-# discoIPC doesn't work on Windows and all other solutions need python 3, so disable it for now until something is found
+# TODO: Find a replacement for discoIPC since it's broken on Windows
 client_id = "530330721911439381"
 client = ipc.DiscordIPC(client_id)
 #client.connect()
@@ -63,6 +63,13 @@ pygame.display.set_caption('PyMania: ' + windowTagLines[random.randint(0, 4)])
 fallbackFont = pygame.font.SysFont(None, 48)
 
 mainMenuMusic = 0
+
+class Background(pygame.sprite.Sprite):
+    def __init__(self, image_file, location):
+        pygame.sprite.Sprite.__init__(self)  #call Sprite initializer
+        self.image = pygame.image.load(image_file)
+        self.rect = self.image.get_rect()
+        self.rect.left, self.rect.top = location
 
 
 def set_activity(songName):
@@ -244,8 +251,14 @@ def pickSong():
     backRect.centerx = windowSurface.get_rect().centerx - 550
     backRect.centery = windowSurface.get_rect().centery + 330
 
+    test = buttonFont.render('TEST', True, menuTextColor)
+    testRect = test.get_rect()
+    testRect.centerx = windowSurface.get_rect().centerx
+    testRect.centery = windowSurface.get_rect().centery
+
     windowSurface.blit(back, backRect)
     windowSurface.blit(gameTitleMenu, titleRect)
+    windowSurface.blit(test,testRect)
 
     while True:
         for event in pygame.event.get():
@@ -263,6 +276,73 @@ def pickSong():
                 clickSound.set_volume(0.6)
                 clickSound.play()
                 selectMode()
+        if testRect.x+test.get_width() > mouse[0] > testRect.x and testRect.y+test.get_height() > mouse[1] > testRect.y:
+            if click[0] == 1:
+                clickSound.set_volume(0.6)
+                clickSound.play()
+                playSong("goingunder")
+
+
+def playSong(songName):
+    print(songName)
+
+    # Declare colors
+    textColor = (240, 240, 240)
+    menuBackgroundColor = (52, 52, 52)
+
+    # Set background
+    windowSurface.fill(menuBackgroundColor)
+    BackGround = Background('songs/'+songName+'/bg.png', [0, 0])
+
+    # Load data
+    pygame.mixer.music.load("songs/" + songName + "/" + songName + ".ogg")
+    smFile = open("songs/" + songName + "/" + songName + ".sm", "r")
+    smData = smFile.readlines()
+
+    print(smData)
+    print(smData[0])
+
+
+    # Declare fonts
+    miscFont = pygame.font.Font('assets/mainMenu.ttf', 45)
+    songTitleFont = pygame.font.Font('assets/mainMenu.ttf', 55)
+
+    songTitle = songTitleFont.render(songName, True, textColor)
+    titleRect = songTitle.get_rect()
+    titleRect.centerx = windowSurface.get_rect().centerx - 390
+    titleRect.centery = windowSurface.get_rect().centery - 310
+
+    back = miscFont.render('BACK', True, textColor)
+    backRect = back.get_rect()
+    backRect.centerx = windowSurface.get_rect().centerx - 550
+    backRect.centery = windowSurface.get_rect().centery + 330
+
+    countDown = miscFont.render('NA', True, textColor)
+    countRect = countDown.get_rect()
+    countRect.centerx = windowSurface.get_rect().centerx
+    countRect.centery = windowSurface.get_rect().centery
+
+    windowSurface.blit(BackGround.image, BackGround.rect)
+    countDown = miscFont.render('3', True, textColor)
+    windowSurface.blit(countDown, countRect)
+    pygame.display.update()
+    time.sleep(1)
+    countDown = miscFont.render('2', True, textColor)
+    windowSurface.blit(countDown, countRect)
+    pygame.display.update()
+    time.sleep(1)
+    countDown = miscFont.render('1', True, textColor)
+    windowSurface.blit(countDown, countRect)
+    pygame.display.update()
+    time.sleep(1)
+    while True:
+           for event in pygame.event.get():
+               if event.type == QUIT:
+                   pygame.quit()
+                   sys.exit()
+
+
+
 
 
 def testLoop():
