@@ -288,11 +288,11 @@ def pickSong():
             if click[0] == 1:
                 clickSound.set_volume(0.6)
                 clickSound.play()
-                playSong("goingunder")
+                playSong("goingunder", 1)
 
 
-def playSong(songName):
-    print(songName)
+def playSong(songName, difficulty):
+    print(songName, difficulty)
 
     # Declare colors
     textColor = (240, 240, 240)
@@ -340,6 +340,7 @@ def playSong(songName):
 
     windowSurface.blit(BackGround.image, BackGround.rect)
     firstLaunch = 1
+    score = 0
     while True:
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -358,9 +359,29 @@ def playSong(songName):
             windowSurface.blit(countDown, countRect)
             pygame.display.update()
             time.sleep(1)
-            pygame.mixer.music.play(-1)
+            pygame.mixer.music.play()
             firstLaunch = 0
-    pygame.display.update()
+        else:
+            if pygame.mixer.music.get_busy() == False:
+                scoreScreen(songName, score, difficulty)
+                pygame.display.update()
+
+
+def scoreScreen(songName, score, difficulty):
+    print(songName, score, difficulty)
+
+    # Declare colors
+    textColor = (240, 240, 240)
+    menuBackgroundColor = (52, 52, 52)
+
+    # Set background
+    windowSurface.fill(menuBackgroundColor)
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
 
 
 def testLoop():
