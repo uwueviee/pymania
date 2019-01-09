@@ -65,6 +65,7 @@ fallbackFont = pygame.font.SysFont(None, 48)
 
 mainMenuMusic = 0
 
+
 class Background(pygame.sprite.Sprite):
     def __init__(self, image_file, location):
         pygame.sprite.Sprite.__init__(self)  #call Sprite initializer
@@ -231,17 +232,12 @@ def selectMode():
 
 
 def pickSong():
-    global mainMenuMusic
     clickSound = pygame.mixer.Sound("assets/click.ogg")
+    startSound = pygame.mixer.Sound("assets/startSong.ogg")
+
     # Define main menu only colors
     menuBackgroundColor = (52, 52, 52)
     menuTextColor = (240, 240, 240)
-
-    # Load sound files and play menu music
-    if mainMenuMusic == 0:
-        pygame.mixer.music.load("assets/menu.ogg")
-        pygame.mixer.music.play(-1)
-        mainMenuMusic = 1
 
     # Draw everything to window
     windowSurface.fill(menuBackgroundColor)
@@ -286,8 +282,8 @@ def pickSong():
                 selectMode()
         if testRect.x+test.get_width() > mouse[0] > testRect.x and testRect.y+test.get_height() > mouse[1] > testRect.y:
             if click[0] == 1:
-                clickSound.set_volume(0.6)
-                clickSound.play()
+                startSound.set_volume(0.6)
+                startSound.play()
                 playSong("goingunder", 1)
 
 
@@ -369,6 +365,14 @@ def playSong(songName, difficulty):
 
 def scoreScreen(songName, score, difficulty):
     print(songName, score, difficulty)
+
+    global mainMenuMusic
+
+    # Load sound files and play menu music
+    if mainMenuMusic == 0:
+        pygame.mixer.music.load("assets/menu.ogg")
+        pygame.mixer.music.play(-1)
+        mainMenuMusic = 1
 
     # Declare colors
     textColor = (240, 240, 240)
