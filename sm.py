@@ -314,6 +314,7 @@ def playSong(songName):
     songProperName = re.sub('[#TITLE:]+', '', smData[0])
     songArtist = re.sub('[#ARTIST:]+', '', smData[2])
     songBPM = re.sub('[#BPMS:]+', '', smData[17])
+    songBPM = re.sub('^[^=]*=', '', songBPM)
     print songProperName
     print songArtist
     print songBPM
