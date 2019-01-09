@@ -4,6 +4,7 @@ from pygame.locals import *
 import random
 from discoIPC import ipc
 import time
+import re
 #import ChromaPython
 
 #Info = ChromaPython.ChromaAppInfo()
@@ -230,10 +231,17 @@ def selectMode():
 
 
 def pickSong():
+    global mainMenuMusic
     clickSound = pygame.mixer.Sound("assets/click.ogg")
     # Define main menu only colors
     menuBackgroundColor = (52, 52, 52)
     menuTextColor = (240, 240, 240)
+
+    # Load sound files and play menu music
+    if mainMenuMusic == 0:
+        pygame.mixer.music.load("assets/menu.ogg")
+        pygame.mixer.music.play(-1)
+        mainMenuMusic = 1
 
     # Draw everything to window
     windowSurface.fill(menuBackgroundColor)
@@ -297,11 +305,18 @@ def playSong(songName):
     # Load data
     pygame.mixer.music.load("songs/" + songName + "/" + songName + ".ogg")
     smFile = open("songs/" + songName + "/" + songName + ".sm", "r")
-    smData = smFile.readlines()
-
-    print(smData)
-    print(smData[0])
-
+    smData = []
+    for line in smFile:
+        for words in line.strip().split(';'):
+            smData.append(words)
+    smData =filter(None, smData)
+    print smData
+    songProperName = re.sub('[#TITLE:]+', '', smData[0])
+    songArtist = re.sub('[#ARTIST:]+', '', smData[2])
+    songBPM = re.sub('[#BPMS:]+', '', smData[17])
+    print songProperName
+    print songArtist
+    print songBPM
 
     # Declare fonts
     miscFont = pygame.font.Font('assets/mainMenu.ttf', 45)
@@ -323,26 +338,28 @@ def playSong(songName):
     countRect.centery = windowSurface.get_rect().centery
 
     windowSurface.blit(BackGround.image, BackGround.rect)
-    countDown = miscFont.render('3', True, textColor)
-    windowSurface.blit(countDown, countRect)
-    pygame.display.update()
-    time.sleep(1)
-    countDown = miscFont.render('2', True, textColor)
-    windowSurface.blit(countDown, countRect)
-    pygame.display.update()
-    time.sleep(1)
-    countDown = miscFont.render('1', True, textColor)
-    windowSurface.blit(countDown, countRect)
-    pygame.display.update()
-    time.sleep(1)
+    firstLaunch = 1
     while True:
-           for event in pygame.event.get():
-               if event.type == QUIT:
-                   pygame.quit()
-                   sys.exit()
-
-
-
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+        if firstLaunch == 1:
+            countDown = miscFont.render('3', True, textColor)
+            windowSurface.blit(countDown, countRect)
+            pygame.display.update()
+            time.sleep(1)
+            countDown = miscFont.render('2', True, textColor)
+            windowSurface.blit(countDown, countRect)
+            pygame.display.update()
+            time.sleep(1)
+            countDown = miscFont.render('1', True, textColor)
+            windowSurface.blit(countDown, countRect)
+            pygame.display.update()
+            time.sleep(1)
+            pygame.mixer.music.play(-1)
+            firstLaunch = 0
+    pygame.display.update()
 
 
 def testLoop():
