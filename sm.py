@@ -288,7 +288,7 @@ def pickSong():
             if click[0] == 1:
                 startSound.set_volume(0.6)
                 startSound.play()
-                playSong("cardofyourdreams", 1)
+                playSong("goinunder", 1)
 
 
 def playSong(songName, difficulty):
@@ -318,15 +318,14 @@ def playSong(songName, difficulty):
         songTrack = re.sub('^[^:]+[:]', '', smData[12])
     except:
         pass
-    try:
+    else:
         songProperName = re.sub('^[^:]+[:]', '', smData[0])
         songArtist = re.sub('^[^:]+[:]', '', smData[2])
         songBPM = re.sub('^[^:]+[:]', '', smData[16])
         songBPM = re.sub('^[^=]*=', '', songBPM)
         songBackground = re.sub('^[^:]+[:]', '', smData[8])
         songTrack = re.sub('^[^:]+[:]', '', smData[11])
-    except:
-        pass
+
     print songProperName
     print songArtist
     print songBPM
