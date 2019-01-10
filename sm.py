@@ -5,6 +5,7 @@ import random
 from discoIPC import ipc
 import time
 import re
+import json
 #import ChromaPython
 
 #Info = ChromaPython.ChromaAppInfo()
@@ -60,6 +61,9 @@ windowTagLines = ["StepMania, but in python", "SnakeMania", "My keyboard broke",
                   "This probably won't work", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
                   "Blame windows for Discord RPC not working"]
 pygame.display.set_caption('PyMania: ' + windowTagLines[random.randint(0, 4)])
+
+with open("songs/songList.json") as f:
+    songDatabase = json.load(f)
 
 fallbackFont = pygame.font.SysFont(None, 48)
 
@@ -284,7 +288,7 @@ def pickSong():
             if click[0] == 1:
                 startSound.set_volume(0.6)
                 startSound.play()
-                playSong("goingunder", 1)
+                playSong("armyofhardcore", 1)
 
 
 def playSong(songName, difficulty):
@@ -294,20 +298,23 @@ def playSong(songName, difficulty):
     textColor = (240, 240, 240)
     menuBackgroundColor = (52, 52, 52)
 
+    # Look for song location in song database
+    songLocation = songDatabase[songName]["folder"]
+
     # Load data
-    smFile = open("songs/" + songName + "/" + songName + ".sm", "r")
+    smFile = open("songs/" + songLocation + "/" + songDatabase[songName]["sm"], "r")
     smData = []
     for line in smFile:
         for words in line.strip().split(';'):
             smData.append(words)
     smData = filter(None, smData)
     print smData
-    songProperName = re.sub('[#TITLE:]+', '', smData[0])
-    songArtist = re.sub('[#ARTIST:]+', '', smData[2])
-    songBPM = re.sub('[#BPMS:]+', '', smData[17])
+    songProperName = re.sub('^[^:]+[:]', '', smData[0])
+    songArtist = re.sub('^[^:]+[:]', '', smData[2])
+    songBPM = re.sub('^[^:]+[:]', '', smData[17])
     songBPM = re.sub('^[^=]*=', '', songBPM)
-    songBackground = re.sub('[#BACKGROUND:]+', '', smData[9])
-    songTrack = re.sub('[#MUSIC:]+', '', smData[12])
+    songBackground = re.sub('^[^:]+[:]', '', smData[9])
+    songTrack = re.sub('^[^:]+[:]', '', smData[12])
     print songProperName
     print songArtist
     print songBPM
@@ -316,10 +323,10 @@ def playSong(songName, difficulty):
 
     # Set background
     windowSurface.fill(menuBackgroundColor)
-    BackGround = Background('songs/'+songName+'/'+songBackground, [0, 0])
+    BackGround = Background('songs/'+songLocation+'/'+songBackground, [0, 0])
 
     # Load song
-    pygame.mixer.music.load("songs/" + songName + "/" + songTrack)
+    pygame.mixer.music.load("songs/" + songLocation + "/" + songTrack)
 
     # Declare fonts
     miscFont = pygame.font.Font('assets/mainMenu.ttf', 45)
