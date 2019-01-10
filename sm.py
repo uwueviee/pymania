@@ -294,10 +294,6 @@ def playSong(songName, difficulty):
     textColor = (240, 240, 240)
     menuBackgroundColor = (52, 52, 52)
 
-    # Set background
-    windowSurface.fill(menuBackgroundColor)
-    BackGround = Background('songs/'+songName+'/bg.png', [0, 0])
-
     # Load data
     pygame.mixer.music.load("songs/" + songName + "/" + songName + ".ogg")
     smFile = open("songs/" + songName + "/" + songName + ".sm", "r")
@@ -311,9 +307,15 @@ def playSong(songName, difficulty):
     songArtist = re.sub('[#ARTIST:]+', '', smData[2])
     songBPM = re.sub('[#BPMS:]+', '', smData[17])
     songBPM = re.sub('^[^=]*=', '', songBPM)
+    songBackground = re.sub('[#BACKGROUND:]+', '', smData[9])
     print songProperName
     print songArtist
     print songBPM
+    print songBackground
+
+    # Set background
+    windowSurface.fill(menuBackgroundColor)
+    BackGround = Background('songs/'+songName+'/'+songBackground, [0, 0])
 
     # Declare fonts
     miscFont = pygame.font.Font('assets/mainMenu.ttf', 45)
@@ -382,11 +384,15 @@ def scoreScreen(songName, score, difficulty):
     windowSurface.fill(menuBackgroundColor)
 
     while True:
+        pygame.display.update()
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
 
+
+def debugArea():
+    print("WARNING: THIS AREA CAN DAMAGE USER PROFILES")
 
 def testLoop():
     clickSound = pygame.mixer.Sound("assets/click.ogg")
