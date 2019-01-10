@@ -295,27 +295,31 @@ def playSong(songName, difficulty):
     menuBackgroundColor = (52, 52, 52)
 
     # Load data
-    pygame.mixer.music.load("songs/" + songName + "/" + songName + ".ogg")
     smFile = open("songs/" + songName + "/" + songName + ".sm", "r")
     smData = []
     for line in smFile:
         for words in line.strip().split(';'):
             smData.append(words)
-    smData =filter(None, smData)
+    smData = filter(None, smData)
     print smData
     songProperName = re.sub('[#TITLE:]+', '', smData[0])
     songArtist = re.sub('[#ARTIST:]+', '', smData[2])
     songBPM = re.sub('[#BPMS:]+', '', smData[17])
     songBPM = re.sub('^[^=]*=', '', songBPM)
     songBackground = re.sub('[#BACKGROUND:]+', '', smData[9])
+    songTrack = re.sub('[#MUSIC:]+', '', smData[12])
     print songProperName
     print songArtist
     print songBPM
     print songBackground
+    print songTrack
 
     # Set background
     windowSurface.fill(menuBackgroundColor)
     BackGround = Background('songs/'+songName+'/'+songBackground, [0, 0])
+
+    # Load song
+    pygame.mixer.music.load("songs/" + songName + "/" + songTrack)
 
     # Declare fonts
     miscFont = pygame.font.Font('assets/mainMenu.ttf', 45)
