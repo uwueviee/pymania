@@ -288,7 +288,7 @@ def pickSong():
             if click[0] == 1:
                 startSound.set_volume(0.6)
                 startSound.play()
-                playSong("armyofhardcore", 1)
+                playSong("cardofyourdreams", 1)
 
 
 def playSong(songName, difficulty):
@@ -309,12 +309,24 @@ def playSong(songName, difficulty):
             smData.append(words)
     smData = filter(None, smData)
     print smData
-    songProperName = re.sub('^[^:]+[:]', '', smData[0])
-    songArtist = re.sub('^[^:]+[:]', '', smData[2])
-    songBPM = re.sub('^[^:]+[:]', '', smData[17])
-    songBPM = re.sub('^[^=]*=', '', songBPM)
-    songBackground = re.sub('^[^:]+[:]', '', smData[9])
-    songTrack = re.sub('^[^:]+[:]', '', smData[12])
+    try:
+        songProperName = re.sub('^[^:]+[:]', '', smData[0])
+        songArtist = re.sub('^[^:]+[:]', '', smData[2])
+        songBPM = re.sub('^[^:]+[:]', '', smData[17])
+        songBPM = re.sub('^[^=]*=', '', songBPM)
+        songBackground = re.sub('^[^:]+[:]', '', smData[9])
+        songTrack = re.sub('^[^:]+[:]', '', smData[12])
+    except:
+        pass
+    try:
+        songProperName = re.sub('^[^:]+[:]', '', smData[0])
+        songArtist = re.sub('^[^:]+[:]', '', smData[2])
+        songBPM = re.sub('^[^:]+[:]', '', smData[16])
+        songBPM = re.sub('^[^=]*=', '', songBPM)
+        songBackground = re.sub('^[^:]+[:]', '', smData[8])
+        songTrack = re.sub('^[^:]+[:]', '', smData[11])
+    except:
+        pass
     print songProperName
     print songArtist
     print songBPM
