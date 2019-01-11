@@ -288,7 +288,7 @@ def pickSong():
             if click[0] == 1:
                 startSound.set_volume(0.6)
                 startSound.play()
-                playSong("armyofhardcore", 1)
+                playSong("goinunder", 1)
 
 
 def playSong(songName, difficulty):
@@ -391,6 +391,8 @@ def playSong(songName, difficulty):
 def scoreScreen(songName, score, difficulty):
     print(songName, score, difficulty)
 
+    clickSound = pygame.mixer.Sound("assets/click.ogg")
+
     global mainMenuMusic
 
     # Load sound files and play menu music
@@ -406,16 +408,48 @@ def scoreScreen(songName, score, difficulty):
     # Set background
     windowSurface.fill(menuBackgroundColor)
 
+    buttonFont = pygame.font.Font('assets/mainMenu.ttf', 45)
+
+    back = buttonFont.render('BACK', True, textColor)
+    backRect = back.get_rect()
+    backRect.centerx = windowSurface.get_rect().centerx - 550
+    backRect.centery = windowSurface.get_rect().centery + 330
+
+    windowSurface.blit(back, backRect)
+
     while True:
+        mouse = pygame.mouse.get_pos()
+        click = pygame.mouse.get_pressed()
+        print(mouse)
+        print(click)
         pygame.display.update()
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
-
+        if backRect.x+back.get_width() > mouse[0] > backRect.x and backRect.y+back.get_height() > mouse[1] > backRect.y:
+            if click[0] == 1:
+                clickSound.set_volume(0.6)
+                clickSound.play()
+                mainMenu()
 
 def debugArea():
     print("WARNING: THIS AREA CAN DAMAGE USER PROFILES")
+    clickSound = pygame.mixer.Sound("assets/click.ogg")
+
+    # Declare colors
+    textColor = (240, 240, 240)
+    menuBackgroundColor = (52, 52, 52)
+
+    # Set background
+    windowSurface.fill(menuBackgroundColor)
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+
 
 def testLoop():
     clickSound = pygame.mixer.Sound("assets/click.ogg")
