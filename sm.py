@@ -288,7 +288,7 @@ def pickSong():
             if click[0] == 1:
                 startSound.set_volume(0.6)
                 startSound.play()
-                playSong("goinunder", 1)
+                playSong("armyofhardcore", 1)
 
 
 def playSong(songName, difficulty):
@@ -309,15 +309,13 @@ def playSong(songName, difficulty):
             smData.append(words)
     smData = filter(None, smData)
     print smData
-    try:
+    if "GENRE" in smData[6]:
         songProperName = re.sub('^[^:]+[:]', '', smData[0])
         songArtist = re.sub('^[^:]+[:]', '', smData[2])
         songBPM = re.sub('^[^:]+[:]', '', smData[17])
         songBPM = re.sub('^[^=]*=', '', songBPM)
         songBackground = re.sub('^[^:]+[:]', '', smData[9])
         songTrack = re.sub('^[^:]+[:]', '', smData[12])
-    except:
-        pass
     else:
         songProperName = re.sub('^[^:]+[:]', '', smData[0])
         songArtist = re.sub('^[^:]+[:]', '', smData[2])
@@ -334,7 +332,10 @@ def playSong(songName, difficulty):
 
     # Set background
     windowSurface.fill(menuBackgroundColor)
-    BackGround = Background('songs/'+songLocation+'/'+songBackground, [0, 0])
+    try:
+        BackGround = Background('songs/'+songLocation+'/'+songBackground, [0, 0])
+    except:
+        pass
 
     # Load song
     pygame.mixer.music.load("songs/" + songLocation + "/" + songTrack)
