@@ -6,6 +6,7 @@ from discoIPC import ipc
 import time
 import re
 import json
+import os
 #import ChromaPython
 
 #Info = ChromaPython.ChromaAppInfo()
@@ -29,7 +30,7 @@ import json
 # TODO: Find a replacement for discoIPC since it's broken on Windows
 client_id = "530330721911439381"
 client = ipc.DiscordIPC(client_id)
-#client.connect()
+client.connect()
 
 baseActivity = {
     'details': 'In the main menu',
@@ -41,7 +42,6 @@ baseActivity = {
 }
 
 menuActivity = {
-    'state': 'testing',
     'details': 'In the main menu',
     'timestamps': {},
     'assets': {
@@ -90,7 +90,7 @@ def set_activity(songName):
 def mainMenu():
     global mainMenuMusic
     # Discord RPC
-    #client.update_activity(menuActivity)
+    client.update_activity(menuActivity)
     # Load sound files and play menu music
     if mainMenuMusic == 0:
         pygame.mixer.music.load("assets/menu.ogg")
@@ -115,7 +115,6 @@ def mainMenu():
     startRect = start.get_rect()
     startRect.centerx = windowSurface.get_rect().centerx
     startRect.centery = windowSurface.get_rect().centery + 120
-
     quit = buttonFont.render('Quit', True, menuTextColor)
     quitRect = quit.get_rect()
     quitRect.centerx = windowSurface.get_rect().centerx
@@ -395,6 +394,18 @@ def scoreScreen(songName, score, difficulty):
 
     global mainMenuMusic
 
+    # Check highscore
+
+    try:
+        if score > userProfile["songScores"][songName]["highScore"]:
+            userProfile["songScores"][songName]["highScore"] = score
+    except:
+        userProfile["songScores"][songName]["highScore"] = score
+    try:
+        userProfile["playSongs"][songName] = userProfile["playSongs"][songName] + 1
+    except:
+        userProfile["playSongs"][songName] = 1
+
     # Load sound files and play menu music
     if mainMenuMusic == 0:
         pygame.mixer.music.load("assets/menu.ogg")
@@ -539,5 +550,25 @@ def testLoop():
                 mainMenu()
 
 
+try:
+    print "Loading user profile from "+os.path.expanduser("~/PyMania/userData.json")
+    userProfileJSON = open(os.path.expanduser('~/PyMania/userData.json'), "r+")
+    userProfile = json.load(userProfileJSON)
+except:
+    print "User profile not found, assuming first launch"
+    if not os.path.exists(os.path.expanduser("~")+"/PyMania"):
+        print os.path.expanduser("~")
+        os.mkdir(os.path.expanduser("~")+"/PyMania")
+        print "Directory ", os.path.expanduser("~")+"/PyMania", " Created "
+        with open(os.path.expanduser('~/PyMania/userData.json'), "w") as f:
+            f.write('{ "playedSongs": {}, "songScores": {}}')
+        userProfileJSON = open(os.path.expanduser('~/PyMania/userData.json'), "r+")
+        userProfile = json.load(userProfileJSON)
+    else:
+        print "Directory "+os.path.expanduser('~/PyMania/')+" already exists"
+        with open(os.path.expanduser('~/PyMania/userData.json'), "w") as f:
+            f.write('{ "playedSongs": {}, "songScores": {}}')
+        userProfileJSON = open(os.path.expanduser('~/PyMania/userData.json'), "r+")
+        userProfile = json.load(userProfileJSON)
 mainMenu()
 testLoop()
