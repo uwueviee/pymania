@@ -7,27 +7,24 @@ import time
 import re
 import json
 import os
-#import ChromaPython
+from ChromaPython import ChromaApp, ChromaAppInfo, ChromaColor, Colors, ChromaGrid
 
-#Info = ChromaPython.ChromaAppInfo()
-#Info.DeveloperName = 'Skye Viau'
-#Info.DeveloperContact = 'skye.viau@gmail.com'
-#Info.Category = 'application'
-#Info.SupportedDevices = ['keyboard', 'mouse', 'mousepad']
-#Info.Description = 'Step Mania clone made in Python and Pygame'
-#Info.Title = 'PyMania'
+DEBUG = True
 
-#App = ChromaPython.ChromaApp(Info)
-#KeyboardGrid = ChromaPython.ChromaGrid('Keyboard')
-#MouseGrid = ChromaPython.ChromaGrid('Mouse')
-#MousepadGrid = ChromaPython.ChromaGrid('Mousepad')
+Info = ChromaAppInfo()
+Info.DeveloperName = 'Skye Viau'
+Info.DeveloperContact = 'skye.viau@gmail.com'
+Info.Category = 'application'
+Info.SupportedDevices = ['keyboard', 'mouse', 'mousepad']
+Info.Description = 'Step Mania clone made in Python and Pygame'
+Info.Title = 'PyMania'
 
-#KeyboardGrid.set(hexcolor="#FF0000")
-#MousepadGrid.set(red=255, blue=0, green=0)
-#MouseGrid.set(hexcolor="0xFF0000")
+App = ChromaApp(Info)
 
+KeyboardGrid = ChromaGrid('Keyboard')
+MouseGrid = ChromaGrid('Mouse')
+MousepadGrid = ChromaGrid('Mousepad')
 
-# TODO: Find a replacement for discoIPC since it's broken on Windows
 client_id = "530330721911439381"
 client = ipc.DiscordIPC(client_id)
 client.connect()
@@ -72,7 +69,7 @@ mainMenuMusic = 0
 
 class Background(pygame.sprite.Sprite):
     def __init__(self, image_file, location):
-        pygame.sprite.Sprite.__init__(self)  #call Sprite initializer
+        pygame.sprite.Sprite.__init__(self)  # call Sprite initializer
         self.image = pygame.image.load(image_file)
         self.rect = self.image.get_rect()
         self.rect.left, self.rect.top = location
@@ -287,7 +284,7 @@ def pickSong():
             if click[0] == 1:
                 startSound.set_volume(0.6)
                 startSound.play()
-                playSong("goinunder", 1)
+                playSong("armyofhardcore", 3)
 
 
 def playSong(songName, difficulty):
@@ -303,31 +300,63 @@ def playSong(songName, difficulty):
     # Load data
     smFile = open("songs/" + songLocation + "/" + songDatabase[songName]["sm"], "r")
     smData = []
+    beatMap = []
+    noteCheck = False
+    readNow = False
     for line in smFile:
         for words in line.strip().split(';'):
-            smData.append(words)
-    smData = filter(None, smData)
-    print smData
-    if "GENRE" in smData[6]:
-        songProperName = re.sub('^[^:]+[:]', '', smData[0])
-        songArtist = re.sub('^[^:]+[:]', '', smData[2])
-        songBPM = re.sub('^[^:]+[:]', '', smData[17])
-        songBPM = re.sub('^[^=]*=', '', songBPM)
-        songBackground = re.sub('^[^:]+[:]', '', smData[9])
-        songTrack = re.sub('^[^:]+[:]', '', smData[12])
-    else:
-        songProperName = re.sub('^[^:]+[:]', '', smData[0])
-        songArtist = re.sub('^[^:]+[:]', '', smData[2])
-        songBPM = re.sub('^[^:]+[:]', '', smData[16])
-        songBPM = re.sub('^[^=]*=', '', songBPM)
-        songBackground = re.sub('^[^:]+[:]', '', smData[8])
-        songTrack = re.sub('^[^:]+[:]', '', smData[11])
 
-    print songProperName
-    print songArtist
-    print songBPM
-    print songBackground
-    print songTrack
+            # AAAAAAAAAAAAAAAAAAAAAA
+
+            if noteCheck == True:
+                if ";" in words:
+                    noteCheck = False
+                    readNow = False
+                    break
+                elif "," in words and readNow == True:
+                    break
+                elif words == str(difficulty)+":":
+                    readNow = True
+                elif readNow == True:
+                    print("READ")
+                    beatMap.append(words)
+                else:
+                    print(words)
+
+            # Back to your regularly scheduled programming
+
+            elif "#TITLE" in words:
+                songProperName = re.sub('^[^:]+[:]', '', words)
+            elif "#ARTIST" in words:
+                songArtist = re.sub('^[^:]+[:]', '', words)
+            elif "#BACKGROUND" in words:
+                songBackground = re.sub('^[^:]+[:]', '', words)
+            elif "#MUSIC" in words:
+                songTrack = re.sub('^[^:]+[:]', '', words)
+            elif "#BPMS" in words:
+                songBPM = re.sub('^[^:]+[:]', '', words)
+                songBPM = re.sub('^[^=]*=', '', songBPM)
+            elif "#NOTES" in words:
+                print("CHECKING NOTES")
+                noteCheck = True
+            else:
+                print("beep beep")
+            smData.append(words)
+    smData = list(filter(None, smData))
+    print(smData)
+
+    print(beatMap)
+
+    print(songProperName)
+    print(songArtist)
+    print(songBPM)
+    print(songBackground)
+    print(songTrack)
+
+    arrowSpeed = difficulty + 6
+    distance = 0
+    barTime = (60 / float(songBPM)) * 4
+    barCount = 0
 
     # Set background
     windowSurface.fill(menuBackgroundColor)
@@ -340,20 +369,21 @@ def playSong(songName, difficulty):
     pygame.mixer.music.load("songs/" + songLocation + "/" + songTrack)
 
     # Declare fonts
-    miscFont = pygame.font.Font('assets/mainMenu.ttf', 45)
-    songTitleFont = pygame.font.Font('assets/mainMenu.ttf', 55)
+    miscFontLarge = pygame.font.Font('assets/mainMenu.ttf', 45)
+    miscFont = pygame.font.Font('assets/mainMenu.ttf', 35)
+    songTitleFont = pygame.font.Font('assets/mainMenu.ttf', 45)
 
-    songTitle = songTitleFont.render(songName, True, textColor)
+    songTitle = songTitleFont.render(songProperName, True, textColor)
     titleRect = songTitle.get_rect()
-    titleRect.centerx = windowSurface.get_rect().centerx - 390
+    titleRect.centerx = windowSurface.get_rect().centerx
     titleRect.centery = windowSurface.get_rect().centery - 310
 
-    back = miscFont.render('BACK', True, textColor)
+    back = miscFont.render(songBPM, True, textColor)
     backRect = back.get_rect()
-    backRect.centerx = windowSurface.get_rect().centerx - 550
-    backRect.centery = windowSurface.get_rect().centery + 330
+    backRect.centerx = windowSurface.get_rect().centerx
+    backRect.centery = windowSurface.get_rect().centery - 250
 
-    countDown = miscFont.render('NA', True, textColor)
+    countDown = miscFontLarge.render('NA', True, textColor)
     countRect = countDown.get_rect()
     countRect.centerx = windowSurface.get_rect().centerx
     countRect.centery = windowSurface.get_rect().centery
@@ -361,6 +391,11 @@ def playSong(songName, difficulty):
     windowSurface.blit(BackGround.image, BackGround.rect)
     firstLaunch = 1
     score = 0
+
+    windowSurface.blit(back, backRect)
+    windowSurface.blit(songTitle, titleRect)
+
+    pygame.display.update()
     while True:
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -385,6 +420,26 @@ def playSong(songName, difficulty):
             if pygame.mixer.music.get_busy() == False:
                 scoreScreen(songName, score, difficulty)
                 pygame.display.update()
+            else:
+                timeOffset = distance / float(arrowSpeed)
+                currentTime = pygame.mixer.music.get_pos()
+                for i in range(len(beatMap) - 3):
+                    print(i)
+                    if i == len(beatMap) - 2:
+                        break
+                    else:
+                        print(beatMap[i])
+                        currentNoteSpawn = beatMap[i]
+                        if currentNoteSpawn[0] == "1":
+                            print(str(i)+" left")
+                        if currentNoteSpawn[1] == "1":
+                            print(str(i)+" up")
+                        if currentNoteSpawn[2] == "1":
+                            print(str(i)+" down")
+                        if currentNoteSpawn[3] == "1":
+                            print(str(i)+" right")
+                print ("check")
+            pygame.display.update()
 
 
 def scoreScreen(songName, score, difficulty):
@@ -396,15 +451,23 @@ def scoreScreen(songName, score, difficulty):
 
     # Check highscore
 
+    highScore = False
+
     try:
-        if score > userProfile["songScores"][songName]["highScore"]:
-            userProfile["songScores"][songName]["highScore"] = score
+        userProfile["playedSongs"][songName] = userProfile["playedSongs"][songName] + 1
     except:
-        userProfile["songScores"][songName]["highScore"] = score
+        userProfile["playedSongs"][songName] = 1
     try:
-        userProfile["playSongs"][songName] = userProfile["playSongs"][songName] + 1
+        if int(score) > userProfile["songScores"][songName]:
+            userProfile["songScores"][songName] = str(score)
+            highScore = True
     except:
-        userProfile["playSongs"][songName] = 1
+        userProfile["songScores"][songName] = str(score)
+
+    json.dump(userProfile, userProfileJSON)
+
+    print(userProfile)
+    print(highScore)
 
     # Load sound files and play menu music
     if mainMenuMusic == 0:
@@ -421,12 +484,24 @@ def scoreScreen(songName, score, difficulty):
 
     buttonFont = pygame.font.Font('assets/mainMenu.ttf', 45)
 
+    scoreText = buttonFont.render('SCORE:', True, textColor)
+    scoreTextRect = scoreText.get_rect()
+    scoreTextRect.centerx = windowSurface.get_rect().centerx - 390
+    scoreTextRect.centery = windowSurface.get_rect().centery - 310
+
+    scoreTextReal = buttonFont.render('SCORE:', True, textColor)
+    scoreTextRealRect = scoreTextReal.get_rect()
+    scoreTextRealRect.centerx = windowSurface.get_rect().centerx - 390
+    scoreTextRealRect.centery = windowSurface.get_rect().centery - 280
+
     back = buttonFont.render('BACK', True, textColor)
     backRect = back.get_rect()
     backRect.centerx = windowSurface.get_rect().centerx - 550
     backRect.centery = windowSurface.get_rect().centery + 330
 
     windowSurface.blit(back, backRect)
+    windowSurface.blit(scoreText, scoreTextRect)
+    windowSurface.blit(scoreTextReal, scoreTextRealRect)
 
     while True:
         mouse = pygame.mouse.get_pos()
@@ -455,14 +530,36 @@ def debugArea():
     # Set background
     windowSurface.fill(menuBackgroundColor)
 
+    buttonFont = pygame.font.Font('assets/mainMenu.ttf', 45)
+
+    back = buttonFont.render('Score Screen', True, textColor)
+    backRect = back.get_rect()
+    backRect.centerx = windowSurface.get_rect().centerx - 550
+    backRect.centery = windowSurface.get_rect().centery + 330
+
+    windowSurface.blit(back, backRect)
+
     while True:
+        mouse = pygame.mouse.get_pos()
+        click = pygame.mouse.get_pressed()
+        print(mouse)
+        print(click)
+        pygame.display.update()
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
-
+        if backRect.x+back.get_width() > mouse[0] > backRect.x and backRect.y+back.get_height() > mouse[1] > backRect.y:
+            if click[0] == 1:
+                clickSound.set_volume(0.6)
+                clickSound.play()
+                scoreScreen("goinunder", 0, 1)
+                pygame.display.update()
 
 def testLoop():
+    KeyboardGrid.set(hexcolor="#FF0000")
+    MousepadGrid.set(red=255, blue=0, green=0)
+    MouseGrid.set(hexcolor="0xFF0000")
     clickSound = pygame.mixer.Sound("assets/click.ogg")
     # Define meme
     rect1_x = random.randint(1, 1159)
@@ -502,9 +599,9 @@ def testLoop():
         string22 = str(rect2_y)
         string3 = str(rect3_x)
         string32 = str(rect3_y)
-        print "[" + string1 + "]" + "[" + string12 + "]"
-        print "[" + string2 + "]" + "[" + string22 + "]"
-        print "[" + string3+ "]" + "[" + string32 + "]"
+        print("[" + string1 + "]" + "[" + string12 + "]")
+        print("[" + string2 + "]" + "[" + string22 + "]")
+        print("[" + string3+ "]" + "[" + string32 + "]")
         rect1_x += rect1xSpeed
         rect1_y += rect1ySpeed
         if rect1_y > 590 or rect1_y < 0:
@@ -551,24 +648,27 @@ def testLoop():
 
 
 try:
-    print "Loading user profile from "+os.path.expanduser("~/PyMania/userData.json")
-    userProfileJSON = open(os.path.expanduser('~/PyMania/userData.json'), "r+")
+    print("Loading user profile from "+os.path.expanduser("~/PyManiaData/userData.json"))
+    userProfileJSON = open(os.path.expanduser('~/PyManiaData/userData.json'), "r+")
     userProfile = json.load(userProfileJSON)
 except:
-    print "User profile not found, assuming first launch"
-    if not os.path.exists(os.path.expanduser("~")+"/PyMania"):
-        print os.path.expanduser("~")
-        os.mkdir(os.path.expanduser("~")+"/PyMania")
-        print "Directory ", os.path.expanduser("~")+"/PyMania", " Created "
-        with open(os.path.expanduser('~/PyMania/userData.json'), "w") as f:
+    print("User profile not found, assuming first launch")
+    if not os.path.exists(os.path.expanduser("~")+"/PyManiaData"):
+        print(os.path.expanduser("~"))
+        os.mkdir(os.path.expanduser("~")+"/PyManiaData")
+        print("Directory ", os.path.expanduser("~")+"/PyManiaData", " Created ")
+        with open(os.path.expanduser('~/PyManiaData/userData.json'), "w") as f:
             f.write('{ "playedSongs": {}, "songScores": {}}')
-        userProfileJSON = open(os.path.expanduser('~/PyMania/userData.json'), "r+")
+        userProfileJSON = open(os.path.expanduser('~/PyManiaData/userData.json'), "r+")
         userProfile = json.load(userProfileJSON)
     else:
-        print "Directory "+os.path.expanduser('~/PyMania/')+" already exists"
-        with open(os.path.expanduser('~/PyMania/userData.json'), "w") as f:
+        print("Directory "+os.path.expanduser('~/PyManiaData/')+" already exists")
+        with open(os.path.expanduser('~/PyManiaData/userData.json'), "w") as f:
             f.write('{ "playedSongs": {}, "songScores": {}}')
-        userProfileJSON = open(os.path.expanduser('~/PyMania/userData.json'), "r+")
+        userProfileJSON = open(os.path.expanduser('~/PyManiaData/userData.json'), "r+")
         userProfile = json.load(userProfileJSON)
+
+if DEBUG == True:
+    debugArea()
 mainMenu()
 testLoop()

@@ -1,3 +1,4 @@
 discoipc
 pygame
 requests
+chroma-py
