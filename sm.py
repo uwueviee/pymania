@@ -7,14 +7,9 @@ import time
 import re
 import json
 import os
-try:
-    from ChromaPython import ChromaApp, ChromaAppInfo, ChromaColor, Colors, ChromaGrid
-except:
-    pass
+from ChromaPython import ChromaApp, ChromaAppInfo, ChromaColor, Colors, ChromaGrid
 
-DEBUG = False
-
-FPS = 60
+DEBUG = True
 
 try:
     Info = ChromaAppInfo()
@@ -88,7 +83,7 @@ clock.tick(60)
 windowIcon = pygame.image.load("assets/PyManiaLogo.png")
 gameTitle = pygame.image.load("assets/PyManiaLogoText.png")
 pygame.display.set_icon(windowIcon)
-windowSurface = pygame.display.set_mode((1280, 720), pygame.DOUBLEBUF, 32)
+windowSurface = pygame.display.set_mode((1280, 720), 0, 32)
 windowTagLines = ["StepMania, but in python", "SnakeMania", "My keyboard broke",
                   "This probably won't work", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
                   "Blame windows for Discord RPC not working"]
@@ -100,6 +95,7 @@ with open("songs/songList.json") as f:
 fallbackFont = pygame.font.SysFont(None, 48)
 
 mainMenuMusic = 0
+
 
 class Background(pygame.sprite.Sprite):
     def __init__(self, image_file, location):
@@ -169,7 +165,7 @@ def mainMenu():
         click = pygame.mouse.get_pressed()
         print(mouse)
         print(click)
-        pygame.display.flip()
+        pygame.display.update()
         if startRect.x+start.get_width() > mouse[0] > startRect.x and startRect.y+start.get_height() > mouse[1] > startRect.y:
             if click[0] == 1:
                 clickSound.set_volume(0.6)
@@ -242,7 +238,7 @@ def selectMode():
         click = pygame.mouse.get_pressed()
         print(mouse)
         print(click)
-        pygame.display.flip()
+        pygame.display.update()
         if startRect.x+start.get_width() > mouse[0] > startRect.x and startRect.y+start.get_height() > mouse[1] > startRect.y:
             if click[0] == 1:
                 clickSound.set_volume(0.6)
@@ -353,15 +349,11 @@ def playSong(songName, difficulty):
                 if ";" in words:
                     noteCheck = False
                     readNow = False
-                    print("BREAKING ;")
-                    print("READNOW FALSE")
                     break
                 elif "," in words and readNow == True:
-                    print("BREAKING ,")
                     break
                 elif words == str(difficulty)+":":
                     readNow = True
-                    print("READNOW TRUE")
                 elif readNow == True:
                     print("READ")
                     beatMap.append(words)
@@ -475,7 +467,7 @@ def playSong(songName, difficulty):
                     if i == len(beatMap) - 2:
                         break
                     else:
-                        clock.tick(60)
+                        print(beatMap[i])
                         currentNoteSpawn = beatMap[i]
                         if currentNoteSpawn[0] == "1":
                             print(str(i)+" left")
@@ -485,8 +477,8 @@ def playSong(songName, difficulty):
                             print(str(i)+" down")
                         if currentNoteSpawn[3] == "1":
                             print(str(i)+" right")
-                print("check")
-            pygame.display.flip()
+                print ("check")
+            pygame.display.update()
 
 
 def scoreScreen(songProperName, songName, score, difficulty):
