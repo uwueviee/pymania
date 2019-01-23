@@ -7,23 +7,31 @@ import time
 import re
 import json
 import os
-from ChromaPython import ChromaApp, ChromaAppInfo, ChromaColor, Colors, ChromaGrid
+try:
+    from ChromaPython import ChromaApp, ChromaAppInfo, ChromaColor, Colors, ChromaGrid
+except:
+    pass
 
-DEBUG = True
+DEBUG = False
 
-Info = ChromaAppInfo()
-Info.DeveloperName = 'Skye Viau'
-Info.DeveloperContact = 'skye.viau@gmail.com'
-Info.Category = 'application'
-Info.SupportedDevices = ['keyboard', 'mouse', 'mousepad']
-Info.Description = 'Step Mania clone made in Python and Pygame'
-Info.Title = 'PyMania'
+FPS = 60
 
-App = ChromaApp(Info)
+try:
+    Info = ChromaAppInfo()
+    Info.DeveloperName = 'Skye Viau'
+    Info.DeveloperContact = 'skye.viau@gmail.com'
+    Info.Category = 'application'
+    Info.SupportedDevices = ['keyboard', 'mouse', 'mousepad']
+    Info.Description = 'Step Mania clone made in Python and Pygame'
+    Info.Title = 'PyMania'
 
-KeyboardGrid = ChromaGrid('Keyboard')
-MouseGrid = ChromaGrid('Mouse')
-MousepadGrid = ChromaGrid('Mousepad')
+    App = ChromaApp(Info)
+
+    KeyboardGrid = ChromaGrid('Keyboard')
+    MouseGrid = ChromaGrid('Mouse')
+    MousepadGrid = ChromaGrid('Mousepad')
+except:
+    pass
 
 client_id = "530330721911439381"
 client = ipc.DiscordIPC(client_id)
@@ -47,13 +55,40 @@ menuActivity = {
     }
 }
 
+modeSelectActivity = {
+    'details': 'Selecting a mode',
+    'timestamps': {},
+    'assets': {
+        'large_image': 'pymanialogo',
+        'large_text': 'PyMania',
+    }
+}
+
+songSelectActivity = {
+    'details': 'Selecting a song',
+    'timestamps': {},
+    'assets': {
+        'large_image': 'pymanialogo',
+        'large_text': 'PyMania',
+    }
+}
+
+songResultsActivity = {
+    'details': 'Getting song results',
+    'timestamps': {},
+    'assets': {
+        'large_image': 'pymanialogo',
+        'large_text': 'PyMania',
+    }
+}
+
 pygame.init()
 clock = pygame.time.Clock()
 clock.tick(60)
 windowIcon = pygame.image.load("assets/PyManiaLogo.png")
 gameTitle = pygame.image.load("assets/PyManiaLogoText.png")
 pygame.display.set_icon(windowIcon)
-windowSurface = pygame.display.set_mode((1280, 720), 0, 32)
+windowSurface = pygame.display.set_mode((1280, 720), pygame.DOUBLEBUF, 32)
 windowTagLines = ["StepMania, but in python", "SnakeMania", "My keyboard broke",
                   "This probably won't work", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
                   "Blame windows for Discord RPC not working"]
@@ -66,7 +101,6 @@ fallbackFont = pygame.font.SysFont(None, 48)
 
 mainMenuMusic = 0
 
-
 class Background(pygame.sprite.Sprite):
     def __init__(self, image_file, location):
         pygame.sprite.Sprite.__init__(self)  # call Sprite initializer
@@ -75,12 +109,13 @@ class Background(pygame.sprite.Sprite):
         self.rect.left, self.rect.top = location
 
 
-def set_activity(songName):
+def set_activity(songName, difficulty):
     activity = baseActivity
-    activity['state'] = 'Playing Level {0}'.format(songName)
+    activity['details'] = 'Playing {0}'.format(songName)
+    activity['state'] = 'On difficulty {0}'.format(difficulty)
     activity['timestamps']['start'] = time.time()
-    activity['assets']['large_image'] = 'level_{0}'.format(songName)
-    activity['assets']['large_text'] = 'Level {0}'.format(songName)
+    activity['assets']['large_image'] = 'pymanialogo'
+    activity['assets']['large_text'] = 'Playing {0}'.format(songName)
     return activity
 
 
@@ -134,7 +169,7 @@ def mainMenu():
         click = pygame.mouse.get_pressed()
         print(mouse)
         print(click)
-        pygame.display.update()
+        pygame.display.flip()
         if startRect.x+start.get_width() > mouse[0] > startRect.x and startRect.y+start.get_height() > mouse[1] > startRect.y:
             if click[0] == 1:
                 clickSound.set_volume(0.6)
@@ -151,6 +186,8 @@ def mainMenu():
 
 def selectMode():
     clickSound = pygame.mixer.Sound("assets/click.ogg")
+
+    client.update_activity(modeSelectActivity)
 
     # Define main menu only colors
     menuBackgroundColor = (52, 52, 52)
@@ -205,7 +242,7 @@ def selectMode():
         click = pygame.mouse.get_pressed()
         print(mouse)
         print(click)
-        pygame.display.update()
+        pygame.display.flip()
         if startRect.x+start.get_width() > mouse[0] > startRect.x and startRect.y+start.get_height() > mouse[1] > startRect.y:
             if click[0] == 1:
                 clickSound.set_volume(0.6)
@@ -234,6 +271,8 @@ def selectMode():
 def pickSong():
     clickSound = pygame.mixer.Sound("assets/click.ogg")
     startSound = pygame.mixer.Sound("assets/startSong.ogg")
+
+    client.update_activity(songSelectActivity)
 
     # Define main menu only colors
     menuBackgroundColor = (52, 52, 52)
@@ -274,7 +313,7 @@ def pickSong():
         click = pygame.mouse.get_pressed()
         print(mouse)
         print(click)
-        pygame.display.update()
+        pygame.display.flip()
         if backRect.x+back.get_width() > mouse[0] > backRect.x and backRect.y+back.get_height() > mouse[1] > backRect.y:
             if click[0] == 1:
                 clickSound.set_volume(0.6)
@@ -289,6 +328,8 @@ def pickSong():
 
 def playSong(songName, difficulty):
     print(songName, difficulty)
+
+    client.update_activity(set_activity(songName, difficulty))
 
     # Declare colors
     textColor = (240, 240, 240)
@@ -312,22 +353,26 @@ def playSong(songName, difficulty):
                 if ";" in words:
                     noteCheck = False
                     readNow = False
+                    print("BREAKING ;")
+                    print("READNOW FALSE")
                     break
                 elif "," in words and readNow == True:
+                    print("BREAKING ,")
                     break
                 elif words == str(difficulty)+":":
                     readNow = True
+                    print("READNOW TRUE")
                 elif readNow == True:
                     print("READ")
                     beatMap.append(words)
                 else:
-                    print(words)
+                    print("ELSE")
 
             # Back to your regularly scheduled programming
 
-            elif "#TITLE" in words:
+            elif "#TITLE:" in words:
                 songProperName = re.sub('^[^:]+[:]', '', words)
-            elif "#ARTIST" in words:
+            elif "#ARTIST:" in words:
                 songArtist = re.sub('^[^:]+[:]', '', words)
             elif "#BACKGROUND" in words:
                 songBackground = re.sub('^[^:]+[:]', '', words)
@@ -352,6 +397,8 @@ def playSong(songName, difficulty):
     print(songBPM)
     print(songBackground)
     print(songTrack)
+
+    client.update_activity(set_activity(songProperName, difficulty))
 
     arrowSpeed = difficulty + 6
     distance = 0
@@ -395,7 +442,7 @@ def playSong(songName, difficulty):
     windowSurface.blit(back, backRect)
     windowSurface.blit(songTitle, titleRect)
 
-    pygame.display.update()
+    pygame.display.flip()
     while True:
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -404,31 +451,31 @@ def playSong(songName, difficulty):
         if firstLaunch == 1:
             countDown = miscFont.render('3', True, textColor)
             windowSurface.blit(countDown, countRect)
-            pygame.display.update()
+            pygame.display.flip()
             time.sleep(1)
             countDown = miscFont.render('2', True, textColor)
             windowSurface.blit(countDown, countRect)
-            pygame.display.update()
+            pygame.display.flip()
             time.sleep(1)
             countDown = miscFont.render('1', True, textColor)
             windowSurface.blit(countDown, countRect)
-            pygame.display.update()
+            pygame.display.flip()
             time.sleep(1)
             pygame.mixer.music.play()
             firstLaunch = 0
         else:
             if pygame.mixer.music.get_busy() == False:
-                scoreScreen(songName, score, difficulty)
-                pygame.display.update()
+                scoreScreen(songProperName, songName, score, difficulty)
+                pygame.display.flip()
             else:
                 timeOffset = distance / float(arrowSpeed)
                 currentTime = pygame.mixer.music.get_pos()
-                for i in range(len(beatMap) - 3):
-                    print(i)
+                mapLength = len(beatMap) - 3
+                for i in range(mapLength):
                     if i == len(beatMap) - 2:
                         break
                     else:
-                        print(beatMap[i])
+                        clock.tick(60)
                         currentNoteSpawn = beatMap[i]
                         if currentNoteSpawn[0] == "1":
                             print(str(i)+" left")
@@ -438,12 +485,14 @@ def playSong(songName, difficulty):
                             print(str(i)+" down")
                         if currentNoteSpawn[3] == "1":
                             print(str(i)+" right")
-                print ("check")
-            pygame.display.update()
+                print("check")
+            pygame.display.flip()
 
 
-def scoreScreen(songName, score, difficulty):
-    print(songName, score, difficulty)
+def scoreScreen(songProperName, songName, score, difficulty):
+    print(songProperName, songName, score, difficulty)
+
+    client.update_activity(songResultsActivity)
 
     clickSound = pygame.mixer.Sound("assets/click.ogg")
 
@@ -508,7 +557,7 @@ def scoreScreen(songName, score, difficulty):
         click = pygame.mouse.get_pressed()
         print(mouse)
         print(click)
-        pygame.display.update()
+        pygame.display.flip()
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
@@ -544,7 +593,7 @@ def debugArea():
         click = pygame.mouse.get_pressed()
         print(mouse)
         print(click)
-        pygame.display.update()
+        pygame.display.flip()
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
@@ -553,13 +602,16 @@ def debugArea():
             if click[0] == 1:
                 clickSound.set_volume(0.6)
                 clickSound.play()
-                scoreScreen("goinunder", 0, 1)
-                pygame.display.update()
+                scoreScreen("Goin' Under", "goinunder", 0, 1)
+                pygame.display.flip()
 
 def testLoop():
-    KeyboardGrid.set(hexcolor="#FF0000")
-    MousepadGrid.set(red=255, blue=0, green=0)
-    MouseGrid.set(hexcolor="0xFF0000")
+    try:
+        KeyboardGrid.set(hexcolor="#FF0000")
+        MousepadGrid.set(red=255, blue=0, green=0)
+        MouseGrid.set(hexcolor="0xFF0000")
+    except:
+        pass
     clickSound = pygame.mixer.Sound("assets/click.ogg")
     # Define meme
     rect1_x = random.randint(1, 1159)
@@ -639,7 +691,7 @@ def testLoop():
             lolTextShow = 0
         else:
             lolTextShow = 1
-        pygame.display.update()
+        pygame.display.flip()
         if backRect.x+back.get_width() > mouse[0] > backRect.x and backRect.y+back.get_height() > mouse[1] > backRect.y:
             if click[0] == 1:
                 clickSound.set_volume(0.6)
