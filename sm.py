@@ -327,7 +327,7 @@ class arrowObject:
     def __init__(self, image, height, speed, type):
         self.speed = speed
         self.image = pygame.transform.smoothscale(image, (128, 128))
-        self.pos = image.get_rect().move(type, 900)
+        self.pos = image.get_rect().move(type, 600)
     def move(self):
         self.pos = self.pos.move(0, -self.speed)
 
@@ -456,20 +456,6 @@ def playSong(songName, difficulty):
             rightArrow = pygame.image.load("skins/default/right.png")
             upArrow = pygame.image.load("skins/default/up.png")
             downArrow = pygame.image.load("skins/default/down.png")
-            countDown = miscFont.render('3', True, textColor)
-            windowSurface.blit(countDown, countRect)
-            pygame.display.flip()
-            time.sleep(1)
-            countDown = miscFont.render('2', True, textColor)
-            windowSurface.blit(countDown, countRect)
-            pygame.display.flip()
-            time.sleep(1)
-            countDown = miscFont.render('1', True, textColor)
-            windowSurface.blit(countDown, countRect)
-            pygame.display.flip()
-            time.sleep(1)
-            pygame.mixer.music.play()
-            firstLaunch = 0
             mapLength = len(beatMap) - 3
             for i in range(mapLength):
                 currentNoteSpawn = beatMap[i]
@@ -489,6 +475,20 @@ def playSong(songName, difficulty):
                     print(str(i) + " right")
                     nextNote = arrowObject(rightArrow, 128, float(arrowSpeed), 800)
                     arrowArray.append(nextNote)
+            countDown = miscFont.render('3', True, textColor)
+            windowSurface.blit(countDown, countRect)
+            pygame.display.flip()
+            time.sleep(1)
+            countDown = miscFont.render('2', True, textColor)
+            windowSurface.blit(countDown, countRect)
+            pygame.display.flip()
+            time.sleep(1)
+            countDown = miscFont.render('1', True, textColor)
+            windowSurface.blit(countDown, countRect)
+            pygame.display.flip()
+            time.sleep(1)
+            pygame.mixer.music.play()
+            firstLaunch = 0
         else:
             if pygame.mixer.music.get_busy() == False:
                 scoreScreen(songProperName, songName, score, difficulty)
@@ -499,7 +499,7 @@ def playSong(songName, difficulty):
                 print(i)
                 i.move()
                 windowSurface.blit(i.image, i.pos)
-                pygame.time.delay(int(float(1.58333333333)))
+                pygame.time.wait(int(int(distance) / int(float(arrowSpeed))))
             pygame.display.update()
 
 
